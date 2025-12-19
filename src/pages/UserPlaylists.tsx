@@ -2,20 +2,24 @@ import { useEffect, useState } from "react";
 import { api } from "../api";
 
 export default function UserPlaylists() {
-  const [my, setMy] = useState<any[]>([]);
+  const [playlists, setPlaylists] = useState<any[]>([]);
   const [songs, setSongs] = useState<any[]>([]);
   const [name, setName] = useState("");
   const [playlistId, setPlaylistId] = useState<number>(0);
   const [songId, setSongId] = useState<number>(0);
+  const [rename, setRename] = useState("");
   const [msg, setMsg] = useState("");
 
   async function load() {
-    const [p, s] = await Promise.all([api.get("/playlist/my"), api.get("/song")]);
-    setMy(p.data);
+    const [p, s] = await Promise.all([
+      api.get("/playlist/my"),
+      api.get("/song"),
+    ]);
+    setPlaylists(p.data);
     setSongs(s.data);
 
-    if (p.data?.length && playlistId === 0) setPlaylistId(p.data[0].id);
-    if (s.data?.length && songId === 0) setSongId(s.data[0].id);
+    if (p.data.length && playlistId === 0) setPlaylistId(p.data[0].id);
+    if (s.data.length && songId === 0) setSongId(s.data[0].id);
   }
 
   useEffect(() => {
@@ -43,19 +47,54 @@ export default function UserPlaylists() {
     }
   }
 
+  async function removeSong(pid: number, sid: number) {
+    setMsg("");
+    try {
+      await api.delete(`/playlist/${pid}/songs/${sid}`);
+      await load();
+    } catch (e: any) {
+      setMsg(e?.response?.data?.message ?? "Remove song failed");
+    }
+  }
+
+  async function renamePlaylist(pid: number) {
+    setMsg("");
+    try {
+      await api.patch(`/playlist/${pid}`, { name: rename });
+      setRename("");
+      await load();
+    } catch (e: any) {
+      setMsg(e?.response?.data?.message ?? "Rename failed");
+    }
+  }
+
+  async function deletePlaylist(pid: number) {
+    setMsg("");
+    try {
+      await api.delete(`/playlist/${pid}`);
+      await load();
+    } catch (e: any) {
+      setMsg(e?.response?.data?.message ?? "Delete failed");
+    }
+  }
+
   return (
     <div>
-      <h2>User - My Playlists</h2>
+      <h2>My Playlists</h2>
 
       <div style={{ display: "grid", gap: 10, maxWidth: 520, marginBottom: 14 }}>
         <div style={{ display: "flex", gap: 8 }}>
-          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Playlist name" />
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Playlist name"
+          />
           <button onClick={createPlaylist}>Create</button>
         </div>
 
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        <div style={{ display: "flex", gap: 8 }}>
           <select value={playlistId} onChange={(e) => setPlaylistId(Number(e.target.value))}>
-            {my.map((p) => (
+            {playlists.map((p) => (
               <option key={p.id} value={p.id}>
                 #{p.id} - {p.name}
               </option>
@@ -65,7 +104,7 @@ export default function UserPlaylists() {
           <select value={songId} onChange={(e) => setSongId(Number(e.target.value))}>
             {songs.map((s) => (
               <option key={s.id} value={s.id}>
-                #{s.id} - {s.title}
+                {s.title}
               </option>
             ))}
           </select>
@@ -76,23 +115,41 @@ export default function UserPlaylists() {
         {msg && <div style={{ color: "crimson" }}>{msg}</div>}
       </div>
 
-      <div style={{ display: "grid", gap: 12 }}>
-        {my.map((p) => (
-          <div key={p.id} style={{ border: "1px solid #ddd", borderRadius: 10, padding: 12 }}>
-            <div style={{ fontWeight: 700 }}>
-              #{p.id} - {p.name}
-            </div>
-            <div style={{ opacity: 0.8, marginTop: 6 }}>Songs:</div>
+      {playlists.map((p) => (
+        <div
+          key={p.id}
+          style={{ border: "1px solid #ddd", borderRadius: 10, padding: 12, marginBottom: 12 }}
+        >
+          <b>{p.name}</b>
+
+          <div style={{ marginTop: 8 }}>
+            <input
+              placeholder="New name"
+              value={rename}
+              onChange={(e) => setRename(e.target.value)}
+            />
+            <button onClick={() => renamePlaylist(p.id)}>Rename</button>
+            <button onClick={() => deletePlaylist(p.id)}>Delete</button>
+          </div>
+
+          <div style={{ marginTop: 10 }}>
+            <b>Songs:</b>
             <ul>
               {(p.songs ?? []).map((s: any) => (
                 <li key={s.id}>
-                  #{s.id} - {s.title} (Album: {s.album?.title})
+                  {s.title} ({s.album?.title})
+                  <button
+                    style={{ marginLeft: 8 }}
+                    onClick={() => removeSong(p.id, s.id)}
+                  >
+                    Remove
+                  </button>
                 </li>
               ))}
             </ul>
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   );
 }
