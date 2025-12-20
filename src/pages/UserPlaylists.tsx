@@ -16,13 +16,20 @@ export default function UserPlaylists() {
   const [renameById, setRenameById] = useState<Record<number, string>>({});
   const [msg, setMsg] = useState("");
 
-  async function loadPlaylists() {
+  async function loadPlaylists(preserveSelectedId?: number) {
     const res = await api.get("/playlist/my");
     const list: Playlist[] = res.data ?? [];
     setPlaylists(list);
 
-    if (list.length && playlistId === 0) {
+    const desired = preserveSelectedId ?? playlistId;
+    const exists = desired && list.some((p) => p.id === desired);
+
+    if (exists) {
+      setPlaylistId(desired);
+    } else if (list.length) {
       setPlaylistId(list[0].id);
+    } else {
+      setPlaylistId(0);
     }
 
     setRenameById((prev) => {
@@ -61,14 +68,14 @@ export default function UserPlaylists() {
 
   async function createPlaylist() {
     setMsg("");
+    const trimmed = name.trim();
+    if (!trimmed) return;
+
     try {
-      const res = await api.post("/playlist", { name });
-      setName("");
+      const res = await api.post("/playlist", { name: trimmed });
       const created: Playlist = res.data;
-      setPlaylists((prev) => [created, ...prev]);
-      setRenameById((prev) => ({ ...prev, [created.id]: created.name }));
-      setPlaylistId(created.id);
-      await loadPlaylists();
+      setName("");
+      await loadPlaylists(created.id);
     } catch (e: any) {
       setMsg(e?.response?.data?.message ?? "Create playlist failed");
     }
@@ -79,7 +86,7 @@ export default function UserPlaylists() {
     if (!playlistId || !songId) return;
     try {
       await api.post(`/playlist/${playlistId}/songs`, { songId });
-      await loadPlaylists();
+      await loadPlaylists(playlistId);
     } catch (e: any) {
       setMsg(e?.response?.data?.message ?? "Add song failed");
     }
@@ -89,7 +96,7 @@ export default function UserPlaylists() {
     setMsg("");
     try {
       await api.delete(`/playlist/${pid}/songs/${sid}`);
-      await loadPlaylists();
+      await loadPlaylists(pid);
     } catch (e: any) {
       setMsg(e?.response?.data?.message ?? "Remove song failed");
     }
@@ -98,9 +105,10 @@ export default function UserPlaylists() {
   async function renamePlaylist(pid: number) {
     setMsg("");
     try {
-      const newName = renameById[pid]?.trim();
+      const newName = (renameById[pid] ?? "").trim();
+      if (!newName) return;
       await api.patch(`/playlist/${pid}`, { name: newName });
-      await loadPlaylists();
+      await loadPlaylists(pid);
     } catch (e: any) {
       setMsg(e?.response?.data?.message ?? "Rename failed");
     }
@@ -110,7 +118,6 @@ export default function UserPlaylists() {
     setMsg("");
     try {
       await api.delete(`/playlist/${pid}`);
-      setPlaylists((prev) => prev.filter((p) => p.id !== pid));
       await loadPlaylists();
     } catch (e: any) {
       setMsg(e?.response?.data?.message ?? "Delete failed");
@@ -128,7 +135,9 @@ export default function UserPlaylists() {
             onChange={(e) => setName(e.target.value)}
             placeholder="Playlist name"
           />
-          <button onClick={createPlaylist}>Create</button>
+          <button onClick={createPlaylist} disabled={!name.trim()}>
+            Create
+          </button>
         </div>
 
         <div style={{ display: "flex", gap: 8 }}>
@@ -158,7 +167,10 @@ export default function UserPlaylists() {
       </div>
 
       {playlists.map((p) => (
-        <div key={p.id} style={{ border: "1px solid #ddd", borderRadius: 10, padding: 12, marginBottom: 12 }}>
+        <div
+          key={p.id}
+          style={{ border: "1px solid #ddd", borderRadius: 10, padding: 12, marginBottom: 12 }}
+        >
           <div style={{ display: "flex", gap: 10 }}>
             <b>{p.name}</b>
             <button onClick={() => deletePlaylist(p.id)}>Delete</button>
@@ -167,9 +179,7 @@ export default function UserPlaylists() {
           <div style={{ marginTop: 8 }}>
             <input
               value={renameById[p.id] ?? ""}
-              onChange={(e) =>
-                setRenameById((prev) => ({ ...prev, [p.id]: e.target.value }))
-              }
+              onChange={(e) => setRenameById((prev) => ({ ...prev, [p.id]: e.target.value }))}
               placeholder="New name"
             />
             <button onClick={() => renamePlaylist(p.id)}>Rename</button>

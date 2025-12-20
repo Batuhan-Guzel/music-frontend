@@ -14,12 +14,12 @@ function base64UrlToBase64(input: string) {
   return input.replace(/-/g, "+").replace(/_/g, "/");
 }
 
-export function getJwtPayload(): any | null {
+function getJwtPayload(): any | null {
   const token = getToken();
   if (!token) return null;
 
   const parts = token.split(".");
-  if (parts.length !== 3) return null;
+  if (parts.length < 2) return null;
 
   try {
     const payload = parts[1];
