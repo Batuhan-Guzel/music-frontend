@@ -29,7 +29,7 @@ export default function Dashboard() {
 
         {!isLoggedIn() && (
           <div className="muted">
-            Login olunca rolüne göre menü açılacak. Admin ise içerik yönetimi, User ise playlist yönetimi görecek.
+            
           </div>
         )}
 
