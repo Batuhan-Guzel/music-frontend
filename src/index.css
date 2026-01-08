@@ -148,3 +148,16 @@ pre {
   border-radius: 10px;
   overflow: auto;
 }
+
+:root {
+  color-scheme: dark;
+}
+
+select {
+  color-scheme: dark;
+}
+
+select option {
+  background-color: #0b1220;
+  color: rgba(255, 255, 255, 0.92);
+}

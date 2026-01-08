@@ -46,7 +46,7 @@ export default function Login() {
           {msg && <div className="error">{msg}</div>}
 
           <div className="muted" style={{ fontSize: 12 }}>
-            Not: Token localStorage’a kaydedilir ve sonraki isteklerde Authorization header’ına eklenir.
+            
           </div>
         </div>
       </div>
