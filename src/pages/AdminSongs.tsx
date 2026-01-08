@@ -31,29 +31,51 @@ export default function AdminSongs() {
   }
 
   return (
-    <div>
-      <h2>Admin - Songs</h2>
+    <div className="page">
+      <div className="card">
+        <div className="card-header">
+          <h2>Admin · Songs</h2>
+          <span className="muted">Create & list songs</span>
+        </div>
 
-      <div style={{ display: "grid", gap: 8, maxWidth: 420, marginBottom: 12 }}>
-        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Song title" />
-        <select value={albumId} onChange={(e) => setAlbumId(Number(e.target.value))}>
-          {albums.map((al) => (
-            <option key={al.id} value={al.id}>
-              #{al.id} - {al.title}
-            </option>
-          ))}
-        </select>
-        <button onClick={create}>Add Song</button>
-        {msg && <div style={{ color: "crimson" }}>{msg}</div>}
+        <div className="form">
+          <div className="row">
+            <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Song title" />
+
+            <select value={albumId} onChange={(e) => setAlbumId(Number(e.target.value))}>
+              {albums.map((al) => (
+                <option key={al.id} value={al.id}>
+                  #{al.id} - {al.title}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <button onClick={create} className="btn-primary" disabled={!title.trim() || !albumId}>
+            Add Song
+          </button>
+          {msg && <div className="error">{msg}</div>}
+        </div>
       </div>
 
-      <ul>
-        {songs.map((s) => (
-          <li key={s.id}>
-            #{s.id} - {s.title} (Album: {s.album?.title})
-          </li>
-        ))}
-      </ul>
+      <div className="card">
+        <div className="card-header">
+          <h2>Songs</h2>
+          <span className="muted">{songs.length} item(s)</span>
+        </div>
+
+        <div className="list">
+          {songs.map((s) => (
+            <div className="list-item" key={s.id}>
+              <b>#{s.id}</b> <span className="muted">·</span> {s.title}
+              <div className="muted" style={{ marginTop: 4 }}>
+                Album: {s.album?.title ?? "-"}
+              </div>
+            </div>
+          ))}
+          {!songs.length && <div className="muted">No songs yet.</div>}
+        </div>
+      </div>
     </div>
   );
 }

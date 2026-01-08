@@ -7,10 +7,7 @@ export default function Register() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
-  
   const [adminCode, setAdminCode] = useState("");
-
   const [msg, setMsg] = useState("");
 
   async function submit() {
@@ -28,35 +25,39 @@ export default function Register() {
   }
 
   return (
-    <div>
-      <h2>Register</h2>
+    <div className="page">
+      <div className="card" style={{ maxWidth: 520, margin: "0 auto" }}>
+        <div className="card-header">
+          <h2>Register</h2>
+          <span className="muted">Create a new account</span>
+        </div>
 
-      <div style={{ display: "grid", gap: 8, maxWidth: 360 }}>
-        <input
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="email"
-        />
+        <div className="form">
+          <div className="row">
+            <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email" />
+            <input
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="password"
+              type="password"
+            />
+          </div>
 
-        <input
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="password"
-          type="password"
-        />
+          <input
+            value={adminCode}
+            onChange={(e) => setAdminCode(e.target.value)}
+            placeholder="Admin Code (optional)"
+          />
 
-        <input
-          value={adminCode}
-          onChange={(e) => setAdminCode(e.target.value)}
-          placeholder="Admin Code (optional)"
-        />
+          <button onClick={submit} className="btn-primary" disabled={!email.trim() || !password.trim()}>
+            Register
+          </button>
 
-        <button onClick={submit}>Register</button>
+          {msg && <div className="error">{msg}</div>}
 
-        {msg && <div style={{ color: "crimson" }}>{msg}</div>}
-
-        <div style={{ fontSize: 12, opacity: 0.7 }}>
-          Admin olmak için Admin Code gir (örn: <b>ADMIN123</b>). Boş bırakırsan USER olur.
+          <div className="muted" style={{ fontSize: 12 }}>
+            Admin olmak için Admin Code gir (örn: <b>ADMIN123</b>). Boş bırakılınca USER olur.
+          </div>
         </div>
       </div>
     </div>

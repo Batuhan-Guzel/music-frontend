@@ -24,19 +24,13 @@ export default function UserPlaylists() {
     const desired = preserveSelectedId ?? playlistId;
     const exists = desired && list.some((p) => p.id === desired);
 
-    if (exists) {
-      setPlaylistId(desired);
-    } else if (list.length) {
-      setPlaylistId(list[0].id);
-    } else {
-      setPlaylistId(0);
-    }
+    if (exists) setPlaylistId(desired);
+    else if (list.length) setPlaylistId(list[0].id);
+    else setPlaylistId(0);
 
     setRenameById((prev) => {
       const next = { ...prev };
-      for (const p of list) {
-        if (next[p.id] === undefined) next[p.id] = p.name;
-      }
+      for (const p of list) if (next[p.id] === undefined) next[p.id] = p.name;
       return next;
     });
   }
@@ -125,76 +119,95 @@ export default function UserPlaylists() {
   }
 
   return (
-    <div>
-      <h2>User - My Playlists</h2>
-
-      <div style={{ display: "grid", gap: 10, maxWidth: 620, marginBottom: 14 }}>
-        <div style={{ display: "flex", gap: 8 }}>
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Playlist name"
-          />
-          <button onClick={createPlaylist} disabled={!name.trim()}>
-            Create
-          </button>
+    <div className="page">
+      <div className="card">
+        <div className="card-header">
+          <h2>User · My Playlists</h2>
+          <span className="muted">Create, rename, delete, add/remove songs</span>
         </div>
 
-        <div style={{ display: "flex", gap: 8 }}>
-          <select value={playlistId} onChange={(e) => setPlaylistId(Number(e.target.value))}>
-            <option value={0}>Select playlist</option>
-            {playlists.map((p) => (
-              <option key={p.id} value={p.id}>
-                #{p.id} - {p.name}
-              </option>
-            ))}
-          </select>
+        <div className="form">
+          <div className="row">
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Playlist name" />
+            <button onClick={createPlaylist} className="btn-primary" disabled={!name.trim()}>
+              Create Playlist
+            </button>
+          </div>
 
-          <select value={songId} onChange={(e) => setSongId(Number(e.target.value))}>
-            {songs.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.title}
-              </option>
-            ))}
-          </select>
+          <div className="row">
+            <select value={playlistId} onChange={(e) => setPlaylistId(Number(e.target.value))}>
+              <option value={0}>Select playlist</option>
+              {playlists.map((p) => (
+                <option key={p.id} value={p.id}>
+                  #{p.id} - {p.name}
+                </option>
+              ))}
+            </select>
 
-          <button onClick={addSong} disabled={!playlistId || !songId}>
-            Add Song
+            <select value={songId} onChange={(e) => setSongId(Number(e.target.value))}>
+              {songs.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.title}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <button onClick={addSong} className="btn-primary" disabled={!playlistId || !songId}>
+            Add Song To Selected Playlist
           </button>
-        </div>
 
-        {msg && <div style={{ color: "crimson" }}>{msg}</div>}
+          {msg && <div className="error">{msg}</div>}
+        </div>
       </div>
 
       {playlists.map((p) => (
-        <div
-          key={p.id}
-          style={{ border: "1px solid #ddd", borderRadius: 10, padding: 12, marginBottom: 12 }}
-        >
-          <div style={{ display: "flex", gap: 10 }}>
-            <b>{p.name}</b>
-            <button onClick={() => deletePlaylist(p.id)}>Delete</button>
+        <div key={p.id} className="card">
+          <div className="card-header">
+            <h2 style={{ fontSize: 16 }}>{p.name}</h2>
+            <div style={{ display: "flex", gap: 8 }}>
+              <span className="badge">#{p.id}</span>
+              <button onClick={() => deletePlaylist(p.id)} className="btn-danger">
+                Delete
+              </button>
+            </div>
           </div>
 
-          <div style={{ marginTop: 8 }}>
-            <input
-              value={renameById[p.id] ?? ""}
-              onChange={(e) => setRenameById((prev) => ({ ...prev, [p.id]: e.target.value }))}
-              placeholder="New name"
-            />
-            <button onClick={() => renamePlaylist(p.id)}>Rename</button>
-          </div>
+          <div className="form">
+            <div className="row">
+              <input
+                value={renameById[p.id] ?? ""}
+                onChange={(e) => setRenameById((prev) => ({ ...prev, [p.id]: e.target.value }))}
+                placeholder="New name"
+              />
+              <button onClick={() => renamePlaylist(p.id)}>Rename</button>
+            </div>
 
-          <ul>
-            {(p.songs ?? []).map((s: any) => (
-              <li key={s.id}>
-                {s.title} ({s.album?.title})
-                <button onClick={() => removeSong(p.id, s.id)}>Remove</button>
-              </li>
-            ))}
-          </ul>
+            <div className="list">
+              {(p.songs ?? []).map((s: any) => (
+                <div
+                  key={s.id}
+                  className="list-item"
+                  style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center" }}
+                >
+                  <div>
+                    <b>{s.title}</b>
+                    <div className="muted" style={{ marginTop: 2 }}>
+                      Album: {s.album?.title ?? "-"}
+                    </div>
+                  </div>
+                  <button onClick={() => removeSong(p.id, s.id)} className="btn-danger">
+                    Remove
+                  </button>
+                </div>
+              ))}
+              {!p.songs?.length && <div className="muted">Bu playlist’te henüz şarkı yok.</div>}
+            </div>
+          </div>
         </div>
       ))}
+
+      {!playlists.length && <div className="muted">Henüz playlist’in yok. Yukarıdan oluşturabilirsin.</div>}
     </div>
   );
 }

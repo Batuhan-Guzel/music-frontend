@@ -27,18 +27,39 @@ export default function AdminArtists() {
   }
 
   return (
-    <div>
-      <h2>Admin - Artists</h2>
-      <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
-        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Artist name" />
-        <button onClick={create}>Add</button>
+    <div className="page">
+      <div className="card">
+        <div className="card-header">
+          <h2>Admin · Artists</h2>
+          <span className="muted">Create & list artists</span>
+        </div>
+
+        <div className="form">
+          <div className="row">
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Artist name" />
+            <button onClick={create} className="btn-primary" disabled={!name.trim()}>
+              Add Artist
+            </button>
+          </div>
+          {msg && <div className="error">{msg}</div>}
+        </div>
       </div>
-      {msg && <div style={{ color: "crimson" }}>{msg}</div>}
-      <ul>
-        {list.map((a) => (
-          <li key={a.id}>#{a.id} - {a.name}</li>
-        ))}
-      </ul>
+
+      <div className="card">
+        <div className="card-header">
+          <h2>Artists</h2>
+          <span className="muted">{list.length} item(s)</span>
+        </div>
+
+        <div className="list">
+          {list.map((a) => (
+            <div className="list-item" key={a.id}>
+              <b>#{a.id}</b> <span className="muted">·</span> {a.name}
+            </div>
+          ))}
+          {!list.length && <div className="muted">No artists yet.</div>}
+        </div>
+      </div>
     </div>
   );
 }

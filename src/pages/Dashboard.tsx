@@ -20,14 +20,34 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <div>
-      <h2>Dashboard</h2>
-      {!isLoggedIn() && <div>Login olunca rolüne göre menü açılacak.</div>}
-      {msg && <div style={{ color: "crimson" }}>{msg}</div>}
+    <div className="page">
+      <div className="card">
+        <div className="card-header">
+          <h2>Dashboard</h2>
+          <span className="muted">Welcome</span>
+        </div>
+
+        {!isLoggedIn() && (
+          <div className="muted">
+            Login olunca rolüne göre menü açılacak. Admin ise içerik yönetimi, User ise playlist yönetimi görecek.
+          </div>
+        )}
+
+        {msg && (
+          <div className="error" style={{ marginTop: 10 }}>
+            {msg}
+          </div>
+        )}
+      </div>
+
       {me && (
-        <pre style={{ background: "#f5f5f5", padding: 12, borderRadius: 8 }}>
-{JSON.stringify(me, null, 2)}
-        </pre>
+        <div className="card">
+          <div className="card-header">
+            <h2>/user/me</h2>
+            <span className="muted">JWT payload & user info</span>
+          </div>
+          <pre>{JSON.stringify(me, null, 2)}</pre>
+        </div>
       )}
     </div>
   );

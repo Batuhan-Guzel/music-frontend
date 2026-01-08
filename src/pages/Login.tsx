@@ -21,13 +21,34 @@ export default function Login() {
   }
 
   return (
-    <div>
-      <h2>Login</h2>
-      <div style={{ display: "grid", gap: 8, maxWidth: 360 }}>
-        <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email" />
-        <input value={password} onChange={(e) => setPassword(e.target.value)} placeholder="password" type="password" />
-        <button onClick={submit}>Login</button>
-        {msg && <div style={{ color: "crimson" }}>{msg}</div>}
+    <div className="page">
+      <div className="card" style={{ maxWidth: 520, margin: "0 auto" }}>
+        <div className="card-header">
+          <h2>Login</h2>
+          <span className="muted">Sign in to continue</span>
+        </div>
+
+        <div className="form">
+          <div className="row">
+            <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email" />
+            <input
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="password"
+              type="password"
+            />
+          </div>
+
+          <button onClick={submit} className="btn-primary">
+            Login
+          </button>
+
+          {msg && <div className="error">{msg}</div>}
+
+          <div className="muted" style={{ fontSize: 12 }}>
+            Not: Token localStorage’a kaydedilir ve sonraki isteklerde Authorization header’ına eklenir.
+          </div>
+        </div>
       </div>
     </div>
   );
